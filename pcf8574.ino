@@ -7,6 +7,8 @@ enum { PINS_PER_PCF8574  = 8,
        NUMBER_OF_LEDS    = NUMBER_OF_BUTTONS,
        BUTTON_PINS_BASE  = 100,
        LED_PINS_BASE     = BUTTON_PINS_BASE + NUMBER_OF_BUTTONS,
+       BUTTON_ON         = LOW,
+       BUTTON_OFF        = HIGH,
        LED_ON            = LOW,
        LED_OFF           = HIGH};
 
@@ -65,8 +67,35 @@ void toggle_led_state(int const led_number)
 }
 
 
+void scan_button_inputs()
+{
+  Serial.println(F("Scanning button inputs:"));
+
+  for (int i = 0; i < NUMBER_OF_BUTTONS; i++)
+  {
+    uint8_t const button_pin = BUTTON_PINS_BASE + i;
+    Serial.print(F("  Button "));
+    Serial.print(i + 1);
+    Serial.print(F(" input on pin "));
+    Serial.print(button_pin);
+    if (BUTTON_ON == multi_io.readValue(button_pin))
+    {
+      Serial.println(F(" is active"));
+    }
+    else
+    {
+      Serial.println(F(" is inactive"));
+    }
+  }
+}
+
+
 void switch_pressed(uint8_t switch_pin, bool switch_held)
 {
+  Serial.println();
+
+  scan_button_inputs();
+
   int const button_number = 1 + switch_pin - BUTTON_PINS_BASE;
 
   if ((button_number < 1) || (button_number > NUMBER_OF_BUTTONS))
@@ -83,21 +112,25 @@ void switch_pressed(uint8_t switch_pin, bool switch_held)
     }
     else
     {
-      Serial.print(F("Button_Number "));
+      Serial.print(F("Button "));
       Serial.print(button_number);
       Serial.println(F(" pressed"));
 
       toggle_led_state(button_number);
     }
-
-    multi_io.runLoop();
   }
 }
 
 
 void switch_released(uint8_t switch_pin, bool)
 {
+  Serial.println();
+
+  scan_button_inputs();
+
   int const button_number = 1 + switch_pin - BUTTON_PINS_BASE;
+
+  Serial.println(switch_pin);
 
   if ((button_number < 1) || (button_number > 8))
   {
@@ -106,7 +139,7 @@ void switch_released(uint8_t switch_pin, bool)
   }
   else
   {
-    Serial.print(F("Button_Number "));
+    Serial.print(F("Button "));
     Serial.print(button_number);
     Serial.println(F(" released"));
   }
@@ -151,10 +184,7 @@ void setup()
     set_led_state(i + 1, LED_OFF);
   }
 
-  multi_io.runLoop();
-
   Serial.println(F("Setup complete"));
-  Serial.println();
 }
 
 
