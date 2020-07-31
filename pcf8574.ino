@@ -3,14 +3,14 @@
 #include <Wire.h>
 
 enum : uint8_t { PINS_PER_PCF8574  = 8,
-  NUMBER_OF_BUTTONS = 8,
-  NUMBER_OF_LEDS    = NUMBER_OF_BUTTONS,
-  BUTTON_PINS_BASE  = 100,
-  LED_PINS_BASE     = BUTTON_PINS_BASE + NUMBER_OF_BUTTONS,
-  BUTTON_ON         = LOW,
-  BUTTON_OFF        = HIGH,
-  LED_ON            = LOW,
-  LED_OFF           = HIGH};
+                 NUMBER_OF_BUTTONS = 8,
+                 NUMBER_OF_LEDS    = NUMBER_OF_BUTTONS,
+                 BUTTON_PINS_BASE  = 100,
+                 LED_PINS_BASE     = BUTTON_PINS_BASE + NUMBER_OF_BUTTONS,
+                 BUTTON_ON         = LOW,
+                 BUTTON_OFF        = HIGH,
+                 LED_ON            = LOW,
+                 LED_OFF           = HIGH};
 
 enum class Button_States { OFF, DEBOUNCING_ON, ON, DEBOUNCING_OFF};
 
@@ -24,7 +24,7 @@ void set_led_state(int const led_number, uint8_t const new_state)
 {
   if ((led_number < 1) || (led_number > NUMBER_OF_LEDS))
   {
-    Serial.print(F("    Ignoring set request for invalid LED "));
+    Serial.print(F("  Ignoring set request for invalid LED "));
     Serial.println(led_number);
   }
   else
@@ -32,7 +32,7 @@ void set_led_state(int const led_number, uint8_t const new_state)
     uint8_t const led_index = led_number - 1;
     uint8_t const led_pin   = LED_PINS_BASE + led_index;
 
-    Serial.print(F("    Turning LED "));
+    Serial.print(F("  Turning LED "));
     Serial.print(led_number);
     Serial.print(F(" on pin "));
     Serial.print(led_pin);
@@ -57,12 +57,12 @@ void toggle_led_state(int const led_number)
 {
   if ((led_number < 1) || (led_number > NUMBER_OF_LEDS))
   {
-    Serial.print(F("    Ignoring toggle request for invalid LED "));
+    Serial.print(F("  Ignoring toggle request for invalid LED "));
     Serial.println(led_number);
   }
   else
   {
-    Serial.print(F("    Toggling LED "));
+    Serial.print(F("  Toggling LED "));
     Serial.println(led_number);
     set_led_state(led_number,
                   (LED_ON == led_state[led_number - 1]) ? LED_OFF : LED_ON);
@@ -70,18 +70,18 @@ void toggle_led_state(int const led_number)
 }
 
 
-void switch_pressed(uint8_t switch_pin)
+void switch_pressed(uint8_t const switch_pin)
 {
   int const button_number = 1 + switch_pin - BUTTON_PINS_BASE;
 
   if ((button_number < 1) || (button_number > NUMBER_OF_BUTTONS))
   {
-    Serial.print(F("    Unrecognised activation on pin "));
+    Serial.print(F(" Unrecognised activation on pin "));
     Serial.println(switch_pin);
   }
   else
   {
-    Serial.print(F("    Button "));
+    Serial.print(F(" Button "));
     Serial.print(button_number);
     Serial.println(F(" pressed"));
 
@@ -90,20 +90,39 @@ void switch_pressed(uint8_t switch_pin)
 }
 
 
-void switch_released(uint8_t switch_pin)
+void switch_released(uint8_t const switch_pin)
 {
   int const button_number = 1 + switch_pin - BUTTON_PINS_BASE;
 
   if ((button_number < 1) || (button_number > 8))
   {
-    Serial.print(F("    Unrecognised deactivation on pin "));
+    Serial.print(F(" Unrecognised deactivation on pin "));
     Serial.println(switch_pin);
   }
   else
   {
-    Serial.print(F("    Button "));
+    Serial.print(F(" Button "));
     Serial.print(button_number);
     Serial.println(F(" released"));
+  }
+}
+
+
+void report_button_input_state(int     const button_number,
+                               uint8_t const button_pin,
+                               uint8_t const input_state)
+{
+  Serial.print(F("Button "));
+  Serial.print(button_number);
+  Serial.print(F(" input on pin "));
+  Serial.print(button_pin);
+  if (BUTTON_ON == input_state)
+  {
+    Serial.println(F(" is active"));
+  }
+  else
+  {
+    Serial.println(F(" is inactive"));
   }
 }
 
@@ -112,18 +131,14 @@ void scan_button_inputs()
 {
   multi_io.runLoop();
 
-  Serial.println(F("Scanning button inputs:"));
-
   for (int i = 0; i < NUMBER_OF_BUTTONS; i++)
   {
     uint8_t const button_pin = BUTTON_PINS_BASE + i;
-    Serial.print(F("  Button "));
-    Serial.print(i + 1);
-    Serial.print(F(" input on pin "));
-    Serial.print(button_pin);
+    // report_button_input_state(i + 1,
+    //                           button_pin,
+    //                           multi_io.readValue(button_pin));
     if (BUTTON_ON == multi_io.readValue(button_pin))
     {
-      Serial.println(F(" is active"));
       switch (button_state[i])
       {
       case Button_States::OFF :
@@ -143,7 +158,6 @@ void scan_button_inputs()
     }
     else
     {
-      Serial.println(F(" is inactive"));
       switch (button_state[i])
       {
       case Button_States::ON :
