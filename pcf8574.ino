@@ -3,7 +3,7 @@
 #include <Wire.h>
 
 enum : uint8_t { PINS_PER_PCF8574  = 8,
-                 NUMBER_OF_BUTTONS = 8,
+                 NUMBER_OF_BUTTONS = 16,
                  NUMBER_OF_LEDS    = NUMBER_OF_BUTTONS,
                  BUTTON_PINS_BASE  = 100,
                  LED_PINS_BASE     = BUTTON_PINS_BASE + NUMBER_OF_BUTTONS,
@@ -94,7 +94,7 @@ void switch_released(uint8_t const switch_pin)
 {
   int const button_number = 1 + switch_pin - BUTTON_PINS_BASE;
 
-  if ((button_number < 1) || (button_number > 8))
+  if ((button_number < 1) || (button_number > NUMBER_OF_BUTTONS))
   {
     Serial.print(F(" Unrecognised deactivation on pin "));
     Serial.println(switch_pin);
@@ -186,12 +186,12 @@ void setup()
 
   Serial.println();
   Serial.println(F("Pins 0 to 99, Arduino"));
-  Serial.println(F("Pins 100 to 107, first PCF8574 at I2C address 0x20"));
-  multi_io.addIoExpander(ioFrom8574(0x20), PINS_PER_PCF8574);
-  Serial.println(F("Pins 108 to 115, second PCF8574 at I2C address 0x21"));
-  multi_io.addIoExpander(ioFrom8574(0x21), PINS_PER_PCF8574);
 
   Serial.println(F("Configuring button inputs"));
+  Serial.println(F("Pins 100 to 107, PCF8574 at I2C address 0x20"));
+  multi_io.addIoExpander(ioFrom8574(0x20), PINS_PER_PCF8574);
+  Serial.println(F("Pins 108 to 115, PCF8574 at I2C address 0x22"));
+  multi_io.addIoExpander(ioFrom8574(0x22), PINS_PER_PCF8574);
   for (int i = 0; i < NUMBER_OF_BUTTONS; i++)
   {
     uint8_t const button_pin = BUTTON_PINS_BASE + i;
@@ -204,6 +204,10 @@ void setup()
   }
 
   Serial.println(F("Configuring LED outputs"));
+  Serial.println(F("Pins 116 to 123, PCF8574 at I2C address 0x21"));
+  multi_io.addIoExpander(ioFrom8574(0x21), PINS_PER_PCF8574);
+  Serial.println(F("Pins 124 to 131, PCF8574 at I2C address 0x23"));
+  multi_io.addIoExpander(ioFrom8574(0x23), PINS_PER_PCF8574);
   for (int i = 0; i < NUMBER_OF_LEDS; i++)
   {
     uint8_t const led_pin = LED_PINS_BASE + i;
